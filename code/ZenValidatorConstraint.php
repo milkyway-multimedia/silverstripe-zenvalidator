@@ -127,14 +127,14 @@ class Constraint_required extends ZenValidatorConstraint{
 
 	public function applyParsley(){
 		parent::applyParsley();
-		$this->field->setAttribute('data-parsley-required', 'true');
+		$this->field->setAttribute('required', 'required');
 		$this->field->addExtraClass('required');
 	}
 
 
 	public function removeParsley(){
 		parent::removeParsley();
-		$this->field->setAttribute('data-parsley-required', 'false');
+		$this->field->setAttribute('required', null);
 		$this->field->removeExtraClass('required');
 	}
 
@@ -294,13 +294,16 @@ class Constraint_value extends ZenValidatorConstraint{
 		parent::applyParsley();
 		switch ($this->type) {
 			case 'min':
-				$this->field->setAttribute('data-parsley-min', $this->val1);
+				$this->field->setAttribute('min', $this->val1);
 				break;
 			case 'max':
-				$this->field->setAttribute('data-parsley-max', $this->val1);
+				$this->field->setAttribute('max', $this->val1);
 				break;
 			case 'range':
-				$this->field->setAttribute('data-parsley-range', sprintf("[%s,%s]", $this->val1, $this->val2));
+                $this->field->SavedAttributeType = $this->field->getAttribute('type');
+                $this->field->setAttribute('type', 'range');
+				$this->field->setAttribute('min', $this->val1);
+				$this->field->setAttribute('max', $this->val2);
 				break;
 		}
 	}
@@ -314,13 +317,16 @@ class Constraint_value extends ZenValidatorConstraint{
 		parent::removeParsley();
 		switch ($this->type) {
 			case 'min':
-				$this->field->setAttribute('data-parsley-min', '');
+				$this->field->setAttribute('min', '');
 				break;
 			case 'max':
-				$this->field->setAttribute('data-parsley-max', '');
+				$this->field->setAttribute('max', '');
 				break;
 			case 'range':
-				$this->field->setAttribute('data-parsley-range', '');
+                $type = $this->field->SavedAttributeType ? $this->field->SavedAttributeType : 'text';
+                $this->field->setAttribute('type', $type);
+                $this->field->setAttribute('min', '');
+                $this->field->setAttribute('max', '');
 				break;
 		}
 	}
@@ -380,13 +386,13 @@ class Constraint_regex extends ZenValidatorConstraint{
 
 	public function applyParsley(){
 		parent::applyParsley();
-		$this->field->setAttribute('data-parsley-pattern', trim($this->regex, '/'));
+		$this->field->setAttribute('pattern', trim($this->regex, '/'));
 	}
 
 
 	public function removeParsley(){
 		parent::removeParsley();
-		$this->field->setAttribute('data-parsley-pattern', '');
+		$this->field->setAttribute('pattern', '');
 	}
 
 
@@ -573,13 +579,51 @@ class Constraint_type extends ZenValidatorConstraint{
 
 	public function applyParsley(){
 		parent::applyParsley();
-		$this->field->setAttribute('data-parsley-type', $this->type);
+
+        switch($this->type) {
+            case self::EMAIL:
+            case self::URL:
+            case self::INTEGER:
+                $this->field->SavedAttributeType = $this->field->getAttribute('type');
+            case self::EMAIL:
+                $this->field->setAttribute('type', 'email');
+                break;
+            case self::URL:
+                $this->field->setAttribute('type', 'url');
+                break;
+            case self::INTEGER:
+                $this->field->setAttribute('type', 'number');
+                break;
+            default:
+                $this->field->setAttribute('data-parsley-type', $this->type);
+                break;
+        }
 	}
 
 
 	public function removeParsley(){
 		parent::removeParsley();
-		$this->field->setAttribute('data-parsley-type', '');
+
+        $type = $this->field->SavedAttributeType;
+
+        if(!$type) {
+            $type = 'text';
+        }
+
+        switch($this->type) {
+            case self::EMAIL:
+                $this->field->setAttribute('type', $type);
+                break;
+            case self::URL:
+                $this->field->setAttribute('type', $type);
+                break;
+            case self::INTEGER:
+                $this->field->setAttribute('type', $type);
+                break;
+            default:
+                $this->field->setAttribute('data-parsley-type', '');
+                break;
+        }
 	}
 
 	
