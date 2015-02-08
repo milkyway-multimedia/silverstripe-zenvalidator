@@ -1,17 +1,56 @@
 (function($) {
 	$.entwine('ss.zenvalidator', function($) {
+
 		$('form.parsley').entwine({
 			onmatch: function() {
+					// Fix validation for optionset based class (attributes not set on child options)
+					$(this).find('.optionset').each(function() {
+						var attrs = $.makeArray(this.attributes);
+						var parsley = {};
+						for(var i=0; i < attrs.length; i++) {
+							var att = attrs[i];
+							if(att.name.indexOf('parsley-') !== -1) {
+								parsley[att.name] = att.value;
+							}
+						}
+						$(this).find('input').attr(parsley);
+					});
+					
         			$(this).parsley({
-            				excluded: 'input[type=button], input[type=submit], input[type=reset], input[type=hidden], :hidden, .ignore-validation'
+            				excluded: 'input[type=button], input[type=submit], input[type=reset], input[type=hidden], .ignore-validation',
+							errorsContainer: function (el) {
+								return el.$element.closest(".field");
+							}
         			});
 			}
+		});
+
+		// Listen for error message when doing remote validation
+		$.listen('parsley:field:error', function(fieldInstance) {
+			if(!fieldInstance._xhr) {
+				return;
+			}
+			if(fieldInstance._xhr.status < 400 || fieldInstance._xhr.status > 499) {
+				return;
+			}
+			fieldInstance.options['remoteMessage'] = fieldInstance._xhr.responseText;
+		});
+
+		// bypass validation on :hidden fields
+		$.listen('parsley:field:validated', function(fieldInstance){
+		    if (fieldInstance.$element.is(":hidden")) {
+		        // hide the message wrapper
+		        fieldInstance._ui.$errorsWrapper.css('display', 'none');
+		        // set validation result to true
+		        fieldInstance.validationResult = true;
+		        return true;
+		    }
 		});
 
 		$('.field').entwine({
 
 			getFormField: function() {
-				var rtn = this.find('[name='+this.getFieldName()+'], [name="'+this.getFieldName()+'[]"]');
+				return this.find('[name='+this.getFieldName()+'], [name="'+this.getFieldName()+'[]"]');
 			},
 
 			getFieldName: function() {
@@ -62,7 +101,7 @@
 
 		$('.field.validation-logic').entwine({
 			onmatch: function () {
-				masters = this.getMasters();			
+				masters = this.getMasters();
 				for(m in masters) {
 					this.closest('form').find('#'+masters[m]).addClass("validation-logic-master");				
 				}
@@ -79,7 +118,11 @@
 			},
 
 			getMasters: function() {
-				return this.getFormField().data('validation-logic-masters').split(",");
+				var field = this.getFormField();
+				if(!field.length) {
+					return new Array();
+				}
+				return field.data('validation-logic-masters').split(",");
 			}
 
 		});
@@ -127,6 +170,11 @@
 
 		$('.field.validation-logic.validation-logic-exclude').entwine({
 			testLogic: function() {
+				if(!this.parseLogic()){					
+					this.find('ul.parsley-errors-list').hide();
+				}else{
+					this.find('ul.parsley-errors-list').show();
+				}
 				this.getFormField().toggleClass('ignore-validation', !this.parseLogic());
 			}
 		});
