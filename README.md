@@ -5,7 +5,7 @@
 
 ## Description
 
-ZenValidator aims to make silverstripe form validation as painless as possible, by allowing configuration of serverside and clientside validation through a comprehensive yet simple API. 
+ZenValidator aims to make silverstripe form validation as painless as possible, by allowing configuration of serverside and clientside validation through one simple API. 
 [Parsley.js](http://parsleyjs.org/documentation.html) is used for the clientside validation in the frontend.
 
 ## Validation Constraints
@@ -296,6 +296,9 @@ To use ZenValidator in the CMS, simply implement a getCMSValidator() method on y
 public function getCMSValidator(){
 	return ZenValidator::create()->setConstraint('Content', Constraint_required::create()
 		->setMessage('Please enter some content'));
+
+	// currently parsley validation doesn't work so well in the cms, so disable.
+	$validator->disableParsley();
 } 
 ```
 

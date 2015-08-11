@@ -3,7 +3,7 @@ window.ParsleyConfig = window.ParsleyConfig || {};
 window.ParsleyConfig.i18n = window.ParsleyConfig.i18n || {};
 
 // Define then the messages
-window.ParsleyConfig.i18n.bg = $.extend(window.ParsleyConfig.i18n.bg || {}, {
+window.ParsleyConfig.i18n.bg = jQuery.extend(window.ParsleyConfig.i18n.bg || {}, {
   defaultMessage: "Невалидна стойност.",
   type: {
     email:        "Невалиден имейл адрес.",
@@ -13,7 +13,6 @@ window.ParsleyConfig.i18n.bg = $.extend(window.ParsleyConfig.i18n.bg || {}, {
     digits:       "Невалидни цифри.",
     alphanum:     "Стойността трябва да садържа само букви или цифри."
   },
-  notnull:        "Полето е задължително.",
   notblank:       "Полето е задължително.",
   required:       "Полето е задължително.",
   pattern:        "Невалидна стойност.",

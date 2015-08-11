@@ -80,9 +80,7 @@ class ZenValidator extends Validator{
 	public function applyParsley(){
 		$this->parsleyEnabled = true;
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
-		Requirements::javascript(THIRDPARTY_DIR.'/jquery-entwine/dist/jquery.entwine-dist.js');
 		Requirements::javascript(ZENVALIDATOR_PATH . '/javascript/parsley/parsley.remote.min.js');
-		Requirements::javascript(ZENVALIDATOR_PATH.'/javascript/zenvalidator.js');
 		
 		$lang = i18n::get_lang_from_locale(i18n::get_locale());
 		if($lang != 'en') {
@@ -92,6 +90,8 @@ class ZenValidator extends Validator{
 		if($this->form){
 			if ($this->defaultJS) {
 				$this->form->addExtraClass('parsley');
+				Requirements::javascript(THIRDPARTY_DIR.'/jquery-entwine/dist/jquery.entwine-dist.js');
+				Requirements::javascript(ZENVALIDATOR_PATH.'/javascript/zenvalidator.js');
 			}else{
 				$this->form->addExtraClass('custom-parsley');
 			}
@@ -274,14 +274,20 @@ class ZenValidator extends Validator{
 
 	    // validate against ZenValidator constraints
 		foreach ($this->constraints as $fieldName => $constraints) {
-				if($this->form->Fields()->dataFieldByName($fieldName)->validationApplies()){
-					foreach ($constraints as $constraint) {
-						if(!$constraint->validate($data[$fieldName])){
-							$this->validationError($fieldName, $constraint->getMessage(), 'required');
-							$valid = false;
-						}
-					}
-				}
+            $field = $this->form->Fields()->dataFieldByName($fieldName);
+
+            if(!$field) {
+                throw new Exception("There is a constraint for $fieldName but this field does not exist. Maybe you should remove the constraint?");
+            }
+
+            if($field->validationApplies()){
+                foreach ($constraints as $constraint) {
+                    if(!$constraint->validate($data[$fieldName])){
+                        $this->validationError($fieldName, $constraint->getMessage(), 'required');
+                        $valid = false;
+                    }
+                }
+            }
 		}
 		return $valid;
 	}

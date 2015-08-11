@@ -62,7 +62,7 @@ class ValidationLogicCriteria extends Object {
 	 * @param [type]    $master The name of the form field to respond to
 	 * @param [type]    $parent The parent {@link ValidationLogicCriteria}
 	 */
-	public function __construct(ZenValidatorConstraint $slave, $master, $parent = null) {
+	public function __construct(FormField $slave, $master, $parent = null) {
 		parent::__construct();
 		$this->slave = $slave;
 		$this->master = $master;
@@ -86,8 +86,8 @@ class ValidationLogicCriteria extends Object {
 				$operator = substr($method, 2);
 			}
 			else {
-				//$operator = ucwords($method);
 				$operator = $method;
+//				$operator = ucwords($method);
 			}
 
 			$this->addCriterion(ValidationLogicCriterion::create($this->master, $operator, $val, $this));
