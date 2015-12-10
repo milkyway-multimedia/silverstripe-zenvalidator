@@ -427,7 +427,7 @@ class Constraint_value extends ZenValidatorConstraint {
 	}
 
 	function validate($value) {
-		if (!$value)
+		if (!is_numeric($value))
 			return true;
 
 		switch ($this->type) {
